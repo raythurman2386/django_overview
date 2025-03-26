@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load location_tags %}
+
+{% block title %}Locations Map{% endblock %}
+
+{% block content %}
+<h1>Locations</h1>
+<div id="map" style="height: 500px;"></div>
+
+{% if locations %}
+<div class="location-list">
+  <h3>All Locations</h3>
+  <ul>
+    {% for location in locations %}
+    <li>
+      <strong>{{ location.name }}</strong>
+      <br>
+      <span class="coordinates">
+        Raw: ({{ location.latitude|floatformat:4 }}, {{ location.longitude|floatformat:4 }})
+        <br>
+        Formatted: {% format_coordinates location.latitude location.longitude %}
+      </span>
+      {% if location.description %}
+      <br>
+      <small>{{ location.description }}</small>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% else %}
+<p>No locations added yet.</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  var map = L.map('map').setView([32.77, -96.80], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  {% for location in locations %}
+  L.marker([{{ location.latitude }}, {{ location.longitude }}])
+      .addTo(map)
+      .bindPopup('<strong>{{ location.name }}</strong><br>{% format_coordinates location.latitude location.longitude %}');
+  {% endfor %}
+</script>
+{% endblock %}
