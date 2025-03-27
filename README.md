@@ -15,6 +15,9 @@ This project serves as a comprehensive guide to Django, demonstrating key concep
 10. [Django Template Tags](#django-template-tags)
 11. [Common Django Commands](#common-django-commands)
 12. [Running the Project](#running-the-project)
+13. [Testing in Django](#testing-in-django)
+14. [Common Django Template Issues](#common-django-template-issues)
+15. [Database Configuration](#database-configuration)
 
 ## Introduction to Django
 
@@ -302,6 +305,224 @@ Key commands for managing a Django project:
 1. **View Locations**: See all locations on an interactive map
 2. **Add Locations**: Add new locations by clicking on the map
 3. **Admin Interface**: Manage locations through Django's admin interface
+
+## Testing in Django
+
+Django provides a robust testing framework that makes it easy to write and run tests. This project demonstrates several types of tests:
+
+### Test Structure
+- Tests are organized in a `tests` package within each app
+- Each test file focuses on a specific component (models, views, forms, etc.)
+- Tests use Django's `TestCase` class for database handling
+
+### Types of Tests
+1. **Model Tests**: Test database operations, validations, and methods
+2. **Form Tests**: Test form validation and processing
+3. **View Tests**: Test HTTP responses, context data, and redirects
+4. **Template Tag Tests**: Test custom template filters and tags
+
+### Running Tests
+```bash
+# Run all tests
+python manage.py test
+
+# Run tests for a specific app
+python manage.py test mapping
+
+# Run tests with more detailed output
+python manage.py test -v 2
+
+# Run a specific test class
+python manage.py test mapping.tests.test_models.LocationModelTest
+```
+
+### Test Best Practices
+1. **Organization**:
+   - Keep tests focused and isolated
+   - Use descriptive test names
+   - Group related tests in test classes
+   - Use `setUp` for common test data
+
+2. **Coverage**:
+   - Test both success and failure cases
+   - Test edge cases and boundary conditions
+   - Test all model methods and form validations
+   - Test view responses and redirects
+
+3. **Performance**:
+   - Use in-memory database for tests
+   - Minimize database operations
+   - Use test fixtures sparingly
+   - Clean up after tests
+
+4. **Maintenance**:
+   - Keep tests up to date with code changes
+   - Use meaningful assertions
+   - Document complex test scenarios
+   - Follow DRY principles
+
+## Common Django Template Issues
+
+### Auto-Formatting and Template Tags
+
+Many code editors and formatters can break Django template syntax. Here are common issues and solutions:
+
+1. **Broken Template Tags**
+   ```html
+   <!-- Before auto-formatting -->
+   {% if user.is_authenticated %}
+   
+   <!-- After incorrect auto-formatting -->
+   { % if user.is_authenticated % }
+   ```
+   **Solution**: Configure your formatter to ignore Django template tags or use template-specific formatters.
+
+2. **Whitespace in Template Tags**
+   ```html
+   <!-- This works -->
+   {{variable}}
+   {% extends "base.html" %}
+   
+   <!-- This might cause issues -->
+   {{ variable }}
+   {% extends   "base.html" %}
+   ```
+   **Solution**: Be consistent with whitespace in template tags.
+
+3. **Broken Variable Filters**
+   ```html
+   <!-- Before auto-formatting -->
+   {{ value|default:"none" }}
+   
+   <!-- After incorrect auto-formatting -->
+   {{ value | default : "none" }}
+   ```
+   **Solution**: Use filter syntax without spaces around the pipe or colon.
+
+### VS Code Settings
+
+If using Visual Studio Code, add these settings to prevent template tag formatting issues:
+
+```json
+{
+    "[django-html]": {
+        "editor.formatOnSave": false
+    },
+    "files.associations": {
+        "*.html": "django-html"
+    }
+}
+```
+
+### Common Template Rendering Errors
+
+1. **Variable Not Found**
+   ```html
+   <!-- This will fail if 'user' is not in context -->
+   {{ user.username }}
+   
+   <!-- Better approach -->
+   {% if user %}{{ user.username }}{% endif %}
+   ```
+
+2. **Template Tag Loading**
+   ```html
+   <!-- Wrong order -->
+   {{ value|my_custom_filter }}
+   {% load my_custom_tags %}
+   
+   <!-- Correct order -->
+   {% load my_custom_tags %}
+   {{ value|my_custom_filter }}
+   ```
+
+3. **Static Files in Templates**
+   ```html
+   <!-- Wrong -->
+   <img src="static/image.jpg">
+   
+   <!-- Correct -->
+   {% load static %}
+   <img src="{% static 'image.jpg' %}">
+   ```
+
+### Best Practices for Template Development
+
+1. Always use template inheritance to maintain consistent structure
+2. Keep templates DRY (Don't Repeat Yourself)
+3. Use meaningful names for template blocks
+4. Comment complex template logic
+5. Handle missing variables gracefully with default filters
+6. Use the `debug` template tag during development:
+   ```html
+   {% if debug %}
+   <pre>{{ context|pprint }}</pre>
+   {% endif %}
+   ```
+
+## Database Configuration
+
+Django supports multiple database backends and allows different configurations for different environments. This project uses:
+
+- **Development**: SQLite (default)
+- **Production**: PostgreSQL
+
+### Environment-Specific Settings
+
+1. Create a settings directory structure:
+```
+config/
+├── settings/
+│   ├── __init__.py
+│   ├── base.py      # Common settings
+│   ├── dev.py       # Development settings
+│   └── prod.py      # Production settings
+```
+
+2. Use environment variables for sensitive data:
+```bash
+# .env
+DJANGO_SETTINGS_MODULE=config.settings.dev
+DJANGO_SECRET_KEY=your-secret-key
+DJANGO_DEBUG=True
+DB_NAME=your_db_name
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+### Running with Different Settings
+
+```bash
+# Development (default)
+python manage.py runserver
+
+# Testing
+python manage.py test --settings=config.settings.test
+
+# Production
+python manage.py runserver --settings=config.settings.prod
+```
+
+### Best Practices
+
+1. **Security**:
+   - Never commit sensitive data
+   - Use environment variables
+   - Keep `.env` in `.gitignore`
+   - Use different credentials for each environment
+
+2. **Performance**:
+   - Use connection pooling in production
+   - Implement proper database indexes
+   - Regular database backups
+   - Monitor database performance
+
+3. **Docker Integration**:
+   - Use Docker Compose for database services
+   - Configure environment variables in docker-compose.yml
+   - Use named volumes for data persistence
 
 ---
 

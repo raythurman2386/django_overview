@@ -46,7 +46,13 @@ var/
 *.egg-info/
 installed.cfg
 *.egg
-
+.idea/
+.vscode/
+venv/
+.env
+.env.local
+.env.development
+.env.production
 # PyInstaller
 # Usually these files are written by a python script from a template
 # before PyInstaller builds the exe, so as to inject date/other infos into it
@@ -83,3 +89,5 @@ __pycache__/
 local_settings.py
 env
 db.sqlite3
+
+staticfiles
